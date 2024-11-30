@@ -1,0 +1,193 @@
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+
+local Window = Fluent:CreateWindow({
+    Title = "Yabi Hub",
+    SubTitle = "By MPANGO1",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 460),
+    Acrylic = true,
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.LeftControl
+})
+
+local Tabs = {
+    AutoEquip = Window:AddTab({ Title = "Auto Equip" }),
+    AutoFame = Window:AddTab({ Title = "Auto Fame" }),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+}
+
+-- ### Auto Equip Weapon ###
+local Weaponlist = {}
+local Weapon = nil
+local AutoEquiped = false
+
+-- ฟังก์ชันโหลดชื่ออาวุธใน Backpack
+local function UpdateWeaponList()
+    table.clear(Weaponlist)
+    for _, v in pairs(game:GetService("Players").LocalPlayer.Backpack:GetChildren()) do
+        table.insert(Weaponlist, v.Name)
+    end
+end
+
+-- สร้าง Dropdown สำหรับเลือกอาวุธ
+local WeaponDropdown = Tabs.AutoEquip:AddDropdown("WeaponDropdown", {
+    Title = "Select Weapon",
+    Description = "Select a weapon to auto-equip",
+    Values = Weaponlist,
+    Multi = false,
+    Default = 1,
+    Callback = function(selectedWeapon)
+        Weapon = selectedWeapon
+    end
+})
+
+-- สร้าง Toggle สำหรับ Auto Equip
+local AutoEquipToggle = Tabs.AutoEquip:AddToggle("AutoEquipToggle", {
+    Title = "Auto Equip Weapon",
+    Default = false,
+    Callback = function(state)
+        AutoEquiped = state
+    end
+})
+
+-- อัปเดต Weapon List เมื่อเริ่มต้น
+UpdateWeaponList()
+WeaponDropdown:SetValue(Weaponlist[1] or "")
+
+-- เริ่มลูป Auto Equip
+task.spawn(function()
+    while task.wait() do
+        if AutoEquiped and Weapon then
+            pcall(function()
+                local player = game.Players.LocalPlayer
+                local backpack = player:FindFirstChild("Backpack")
+                if backpack then
+                    local tool = backpack:FindFirstChild(Weapon)
+                    if tool then
+                        player.Character.Humanoid:EquipTool(tool)
+                    end
+                end
+            end)
+        end
+    end
+end)
+
+-- ปุ่ม Refresh Weapon List
+Tabs.AutoEquip:AddButton({
+    Title = "Refresh Weapon List",
+    Callback = function()
+        UpdateWeaponList()
+        Fluent:Notify({
+            Title = "Weapon List Updated",
+            Content = "Refreshed successfully!",
+            Duration = 3
+        })
+    end
+})
+
+-- ### Auto Fame ###
+local function getMonsterNames()
+    local names = {}
+    local seen = {} -- ใช้เพื่อเก็บชื่อที่เราเคยเจอแล้ว
+    for _, mob in pairs(workspace.Mob:GetChildren()) do
+        if mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") then
+            if not seen[mob.Name] then
+                table.insert(names, mob.Name) -- เพิ่มชื่อมอนสเตอร์ที่ยังไม่ซ้ำ
+                seen[mob.Name] = true -- บันทึกชื่อมอนสเตอร์ที่เราเจอแล้ว
+            end
+        end
+    end
+    return names
+end
+
+-- สร้าง Dropdown สำหรับเลือกมอนสเตอร์
+local monsterNames = getMonsterNames()
+local MonsterDropdown = Tabs.AutoFame:AddDropdown("MonsterDropdown", {
+    Title = "Select Monster",
+    Values = monsterNames,
+    Default = 1
+})
+
+-- สร้าง Dropdown สำหรับเลือกตำแหน่ง
+local PositionDropdown = Tabs.AutoFame:AddDropdown("PositionDropdown", {
+    Title = "Select Position",
+    Description = "Choose where to move relative to the monster",
+    Values = { "ตั้งบน", "ตั้งหน้า", "ตั้งหลัง", "ตั้งล่าง" },
+    Default = "ตั้งบน"
+})
+
+-- สร้าง Toggle สำหรับ AutoFame
+local AutoFameToggle = Tabs.AutoFame:AddToggle("AutoFameToggle", { Title = "Auto Fame", Default = false })
+
+-- ### Auto Attack ###
+local AutoAttackToggle = Tabs.AutoFame:AddToggle("AutoAttackToggle", {
+    Title = "Auto Attack",
+    Default = false,
+    Callback = function(state)
+        if state then
+            spawn(function()
+                local cooldown = 0.2  -- เวลา cooldown
+                local lastAttackTime = 0
+                game:GetService("RunService").RenderStepped:Connect(function()
+                    pcall(function()
+                        local currentTime = tick()
+                        if currentTime - lastAttackTime >= cooldown then
+                            game:GetService'VirtualUser':CaptureController()
+                            game:GetService'VirtualUser':Button1Down(Vector2.new(1280, 672))
+                            lastAttackTime = currentTime
+                        end
+                    end)
+                end)
+            end)
+        end
+    end
+})
+
+-- ### Auto Fame Logic ###
+AutoFameToggle:OnChanged(function()
+    local selectedMonster = MonsterDropdown.Value
+    local selectedPosition = PositionDropdown.Value
+    if AutoFameToggle.Value then
+        print("AutoFame Activated for:", selectedMonster, "at position:", selectedPosition)
+        spawn(function()
+            while AutoFameToggle.Value do
+                task.wait()
+                pcall(function()
+                    for _, v in pairs(workspace.Mob:GetDescendants()) do
+                        if v.Name == selectedMonster and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") then
+                            if v.Humanoid.Health > 0 then
+                                local offset = Vector3.new(0, 10, 0) -- ค่าเริ่มต้น "ตั้งบน"
+                                if selectedPosition == "ตั้งบน" then
+                                    offset = Vector3.new(0, 10, 0)
+                                elseif selectedPosition == "ตั้งหน้า" then
+                                    offset = v.HumanoidRootPart.CFrame.LookVector * -10
+                                elseif selectedPosition == "ตั้งหลัง" then
+                                    offset = v.HumanoidRootPart.CFrame.LookVector * 10
+                                elseif selectedPosition == "ตั้งล่าง" then
+                                    offset = Vector3.new(0, -10, 0)
+                                end
+
+                                repeat
+                                    task.wait()
+                                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame =
+                                        v.HumanoidRootPart.CFrame * CFrame.new(offset)
+                                until not AutoFameToggle.Value or v.Humanoid.Health <= 0
+                            end
+                        end
+                    end
+                end)
+            end
+        end)
+    else
+        print("AutoFame Deactivated")
+    end
+end)
+
+-- UI แสดงว่าโหลดสำเร็จ
+Fluent:Notify({
+    Title = "Fluent",
+    Content = "The script has been loaded.",
+    Duration = 8
+})
