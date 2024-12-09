@@ -196,7 +196,7 @@ autoDullahanToggle:OnChanged(function()
                 task.wait()
                 pcall(function()
                     for _, v in pairs(workspace.Living:GetDescendants()) do
-                        if v.Name == "The Dullahan" and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") then
+                        if v.Name == "Dullahan" and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") then
                             if v.Humanoid.Health > 0 then
                                 -- หยุด AutoBox และ AutoMob
                                 _G.AutoBox = false
