@@ -31,7 +31,7 @@ autoFameToggle:OnChanged(function()
         })
 
         autoFameCoroutine = coroutine.create(function()
-            local targetMonsters = {"Menos", "Frog Hollow", "Bandit", "Fishbone", "Paper Curse", "Thug"}
+            local targetMonsters = {"Menos", "Frog Hollow", "Bandit", "Fishbone", "Paper Curse", "Thug", "Adjuchas"}
 
             while _G.AutoFame do
                 task.wait()
