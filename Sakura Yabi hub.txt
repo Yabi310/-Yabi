@@ -1,0 +1,167 @@
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+
+local Window = Fluent:CreateWindow({
+    Title = "Yabi Hub",
+    SubTitle = "by GUMIBOA",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 460),
+    Acrylic = true,
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.LeftControl
+})
+
+local Tabs = {
+    Main = Window:AddTab({ Title = "Main", Icon = "" }),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+}
+
+-- AUTO FAME FUNCTIONALITY
+local autoFameToggle = Tabs.Main:AddToggle("AutoFameToggle", { Title = "Auto Fame", Default = false })
+local autoFameCoroutine
+
+autoFameToggle:OnChanged(function()
+    _G.AutoFame = autoFameToggle.Value
+    if _G.AutoFame then
+        Fluent:Notify({
+            Title = "Auto Fame",
+            Content = "Auto Fame started.",
+            Duration = 5
+        })
+
+        autoFameCoroutine = coroutine.create(function()
+            local targetMonsters = {"Menos", "Frog Hollow", "Bandit", "Fishbone", "Paper Curse", "Thug"}
+
+            while _G.AutoFame do
+                task.wait()
+                pcall(function()
+                    for _, v in pairs(workspace.Living:GetDescendants()) do
+                        if table.find(targetMonsters, v.Name) and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") then
+                            if v.Humanoid.Health > 0 then
+                                repeat
+                                    task.wait()
+                                    -- วาปไปที่มอนสเตอร์
+                                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame =
+                                        v.HumanoidRootPart.CFrame * CFrame.new(0, 0, -1)
+                                until not _G.AutoFame or v.Humanoid.Health <= 0
+                            end
+                        end
+                    end
+                end)
+            end
+        end)
+
+        coroutine.resume(autoFameCoroutine)
+    else
+        Fluent:Notify({
+            Title = "Auto Fame Stopped",
+            Content = "Auto Fame has been stopped.",
+            Duration = 5
+        })
+    end
+end)
+
+-- AUTO SKILL FUNCTIONALITY
+local autoSkillToggle = Tabs.Main:AddToggle("AutoSkillToggle", { Title = "Auto Skill", Default = false })
+local autoSkillCoroutine
+
+autoSkillToggle:OnChanged(function()
+    _G.AutoSkill = autoSkillToggle.Value
+    if _G.AutoSkill then
+        Fluent:Notify({
+            Title = "Auto Skill",
+            Content = "Auto Skill started.",
+            Duration = 5
+        })
+
+        autoSkillCoroutine = coroutine.create(function()
+            while _G.AutoSkill do
+                task.wait()
+                pcall(function()
+                    local remote = game:GetService("ReplicatedStorage"):WaitForChild("ItadoriRemote")
+                    remote:WaitForChild("Punch"):FireServer()
+                    
+                    remote:WaitForChild("Barrage"):FireServer()
+                    
+                    remote:WaitForChild("Divergent"):FireServer()
+                    
+                    remote:WaitForChild("BlackFlash"):FireServer()
+                    
+                    remote:WaitForChild("Slam"):FireServer()
+                    
+                    remote:WaitForChild("Sense"):FireServer()
+                    
+                    remote:WaitForChild("Enhance"):FireServer()
+                    
+                    game:GetService("ReplicatedStorage"):WaitForChild("SkillRemote"):WaitForChild("YutaRemote"):WaitForChild("Domain"):FireServer()
+                    
+                end)
+            end
+        end)
+
+        coroutine.resume(autoSkillCoroutine)
+    else
+        Fluent:Notify({
+            Title = "Auto Skill Stopped",
+            Content = "Auto Skill has been stopped.",
+            Duration = 5
+        })
+    end
+end)
+
+-- AUTO TELEPORT TO BOXES
+local autoBoxToggle = Tabs.Main:AddToggle("AutoBoxToggle", { Title = "Auto Teleport Boxes", Default = false })
+local autoBoxCoroutine
+
+autoBoxToggle:OnChanged(function()
+    _G.AutoBox = autoBoxToggle.Value
+    if _G.AutoBox then
+        Fluent:Notify({
+            Title = "Auto Boxes",
+            Content = "Auto teleport to boxes started.",
+            Duration = 5
+        })
+
+        autoBoxCoroutine = coroutine.create(function()
+            local targetNames = {"Box", "Barrel", "Chest"}
+            while _G.AutoBox do
+                task.wait()
+                pcall(function()
+                    for _, child in pairs(workspace.Item:GetChildren()) do
+                        if table.find(targetNames, child.Name) and child:IsA("BasePart") then
+                            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = child.CFrame
+                            task.wait(2)
+                        end
+                    end
+                end)
+            end
+        end)
+
+        coroutine.resume(autoBoxCoroutine)
+    else
+        Fluent:Notify({
+            Title = "Auto Boxes Stopped",
+            Content = "Auto teleport to boxes has been stopped.",
+            Duration = 5
+        })
+    end
+end)
+
+SaveManager:SetLibrary(Fluent)
+InterfaceManager:SetLibrary(Fluent)
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({})
+InterfaceManager:SetFolder("AutoFarmHub")
+SaveManager:SetFolder("AutoFarmHub/specific-game")
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+Window:SelectTab(1)
+
+Fluent:Notify({
+    Title = "Auto Farm Hub",
+    Content = "The script has been loaded.",
+    Duration = 8
+})
+
+SaveManager:LoadAutoloadConfig()
