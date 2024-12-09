@@ -184,6 +184,46 @@ antiAFKToggle:OnChanged(function()
     end
 end)
 
+local autoDullahanToggle = Tabs.Main:AddToggle("AutoDullahanToggle", { Title = "Auto Dullahan", Default = false })
+local autoDullahanCoroutine
+
+autoDullahanToggle:OnChanged(function()
+    _G.AutoDullahan = autoDullahanToggle.Value
+    if _G.AutoDullahan then
+        Fluent:Notify({ Title = "Auto Dullahan", Content = "Started attacking Dullahan.", Duration = 5 })
+        autoDullahanCoroutine = coroutine.create(function()
+            while _G.AutoDullahan do
+                task.wait()
+                pcall(function()
+                    for _, v in pairs(workspace.Living:GetDescendants()) do
+                        if v.Name == "Dullahan" and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") then
+                            if v.Humanoid.Health > 0 then
+                                -- หยุด AutoBox และ AutoMob
+                                _G.AutoBox = false
+                                repeat
+                                    task.wait()
+                                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame =
+                                        v.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0)
+                                until not _G.AutoDullahan or v.Humanoid.Health <= 0
+                                -- กลับมาเปิด AutoBox
+                                _G.AutoBox = true
+                            end
+                        end
+                    end
+                end)
+            end
+        end)
+        coroutine.resume(autoDullahanCoroutine)
+    else
+        Fluent:Notify({ Title = "Auto Dullahan", Content = "Stopped attacking Dullahan.", Duration = 5 })
+    end
+end)
+
+-- เริ่มต้นการโจมตี Dullahan
+coroutine.wrap(AutoDullahan)()
+
+
+
 SaveManager:SetLibrary(Fluent)
 InterfaceManager:SetLibrary(Fluent)
 SaveManager:IgnoreThemeSettings()
