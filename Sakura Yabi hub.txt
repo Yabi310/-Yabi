@@ -203,7 +203,7 @@ autoDullahanToggle:OnChanged(function()
                                 repeat
                                     task.wait()
                                     game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame =
-                                        v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
+                                        v.HumanoidRootPart.CFrame * CFrame.new(0, 0, -3)
                                 until not _G.AutoDullahan or v.Humanoid.Health <= 0
                                 -- กลับมาเปิด AutoBox
                                 _G.AutoBox = true
