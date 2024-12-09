@@ -148,6 +148,42 @@ autoBoxToggle:OnChanged(function()
     end
 end)
 
+-- Anti-AFK Functionality
+local antiAFKToggle = Tabs.Main:AddToggle("AntiAFKToggle", { Title = "Anti AFK", Default = false })
+local antiAFKCoroutine
+
+antiAFKToggle:OnChanged(function()
+    _G.AntiAFK = antiAFKToggle.Value
+    if _G.AntiAFK then
+        Fluent:Notify({
+            Title = "Anti AFK",
+            Content = "Anti AFK started.",
+            Duration = 5
+        })
+
+        antiAFKCoroutine = coroutine.create(function()
+            while _G.AntiAFK do
+                task.wait(300) -- รอ 5 นาที (300 วินาที)
+                pcall(function()
+                    -- จำลองการเคลื่อนไหวหรือการกดปุ่ม
+                    local humanoid = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
+                    if humanoid then
+                        humanoid:Move(Vector3.new(math.random(-1, 1), 0, math.random(-1, 1))) -- เคลื่อนไหวไปยังตำแหน่งสุ่มเล็กน้อย
+                    end
+                end)
+            end
+        end)
+
+        coroutine.resume(antiAFKCoroutine)
+    else
+        Fluent:Notify({
+            Title = "Anti AFK Stopped",
+            Content = "Anti AFK has been stopped.",
+            Duration = 5
+        })
+    end
+end)
+
 SaveManager:SetLibrary(Fluent)
 InterfaceManager:SetLibrary(Fluent)
 SaveManager:IgnoreThemeSettings()
