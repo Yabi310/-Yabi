@@ -78,15 +78,29 @@ autoSkillToggle:OnChanged(function()
             while _G.AutoSkill do
                 task.wait()
                 pcall(function()
-                    local remote = game:GetService("ReplicatedStorage"):WaitForChild("ItadoriRemote")
-                    remote:WaitForChild("Punch"):FireServer()
-                    remote:WaitForChild("Barrage"):FireServer()
-                    remote:WaitForChild("Divergent"):FireServer()
-                    remote:WaitForChild("BlackFlash"):FireServer()
-                    remote:WaitForChild("Slam"):FireServer()
-                    remote:WaitForChild("Sense"):FireServer()
-                    remote:WaitForChild("Enhance"):FireServer()
+                    -- ItadoriRemote
+                    local itadoriRemote = game:GetService("ReplicatedStorage"):WaitForChild("ItadoriRemote")
+                    itadoriRemote:WaitForChild("Punch"):FireServer()
+                    itadoriRemote:WaitForChild("Barrage"):FireServer()
+                    itadoriRemote:WaitForChild("Divergent"):FireServer()
+                    itadoriRemote:WaitForChild("BlackFlash"):FireServer()
+                    itadoriRemote:WaitForChild("Slam"):FireServer()
+                    itadoriRemote:WaitForChild("Sense"):FireServer()
+                    itadoriRemote:WaitForChild("Enhance"):FireServer()
+                    
                     game:GetService("ReplicatedStorage"):WaitForChild("SkillRemote"):WaitForChild("YutaRemote"):WaitForChild("Domain"):FireServer()
+
+                    -- MidknightRemote
+                    local args = {
+                        [1] = false
+                    }
+                    local midknightRemote = game:GetService("ReplicatedStorage"):WaitForChild("MidknightRemote")
+                    midknightRemote:WaitForChild("Dawn"):FireServer(unpack(args))
+                    midknightRemote:WaitForChild("Beam"):FireServer()
+                    midknightRemote:WaitForChild("Ash"):FireServer()
+                    midknightRemote:WaitForChild("Cleaving"):FireServer()
+                    midknightRemote:WaitForChild("Barrier"):FireServer()
+                    midknightRemote:WaitForChild("Punch"):FireServer()
                 end)
             end
         end)
