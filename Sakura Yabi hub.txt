@@ -17,16 +17,22 @@ local Tabs = {
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
 
--- **AUTO FAME**
+-- AUTO FAME FUNCTIONALITY
 local autoFameToggle = Tabs.Main:AddToggle("AutoFameToggle", { Title = "Auto Fame", Default = false })
 local autoFameCoroutine
 
 autoFameToggle:OnChanged(function()
     _G.AutoFame = autoFameToggle.Value
     if _G.AutoFame then
-        Fluent:Notify({ Title = "Auto Fame", Content = "Auto Fame started.", Duration = 5 })
+        Fluent:Notify({
+            Title = "Auto Fame",
+            Content = "Auto Fame started.",
+            Duration = 5
+        })
+
         autoFameCoroutine = coroutine.create(function()
-            local targetMonsters = {"Menos", "Frog Hollow", "Fishbone", "Paper Curse", "Adjuchas", "Spider Curse", "Contorted Curse"}
+            local targetMonsters = {"Menos", "Frog Hollow", "Fishbone", "Paper Curse", "Adjuchas"}
+
             while _G.AutoFame do
                 task.wait()
                 pcall(function()
@@ -35,8 +41,8 @@ autoFameToggle:OnChanged(function()
                             if v.Humanoid.Health > 0 then
                                 repeat
                                     task.wait()
-                                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = 
-                                        v.HumanoidRootPart.CFrame * CFrame.new(0, 0, -3)
+                                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame =
+                                        v.HumanoidRootPart.CFrame * CFrame.new(0, 0, -1)
                                 until not _G.AutoFame or v.Humanoid.Health <= 0
                             end
                         end
@@ -44,66 +50,269 @@ autoFameToggle:OnChanged(function()
                 end)
             end
         end)
+
         coroutine.resume(autoFameCoroutine)
     else
-        Fluent:Notify({ Title = "Auto Fame Stopped", Content = "Auto Fame has been stopped.", Duration = 5 })
+        Fluent:Notify({
+            Title = "Auto Fame Stopped",
+            Content = "Auto Fame has been stopped.",
+            Duration = 5
+        })
     end
 end)
 
--- **AUTO SKILL**
+-- AUTO SKILL FUNCTIONALITY
 local autoSkillToggle = Tabs.Main:AddToggle("AutoSkillToggle", { Title = "Auto Skill", Default = false })
 local autoSkillCoroutine
 
 autoSkillToggle:OnChanged(function()
     _G.AutoSkill = autoSkillToggle.Value
     if _G.AutoSkill then
-        Fluent:Notify({ Title = "Auto Skill", Content = "Auto Skill started.", Duration = 5 })
+        Fluent:Notify({
+            Title = "Auto Skill",
+            Content = "Auto Skill started.",
+            Duration = 5
+        })
+
         autoSkillCoroutine = coroutine.create(function()
             while _G.AutoSkill do
                 task.wait()
                 pcall(function()
                     local remote = game:GetService("ReplicatedStorage"):WaitForChild("ItadoriRemote")
-                    for _, skill in pairs({"Punch", "Barrage", "Divergent", "BlackFlash", "Slam", "Sense", "Enhance"}) do
-                        remote:WaitForChild(skill):FireServer()
-                    end
+                    remote:WaitForChild("Punch"):FireServer()
+                    remote:WaitForChild("Barrage"):FireServer()
+                    remote:WaitForChild("Divergent"):FireServer()
+                    remote:WaitForChild("BlackFlash"):FireServer()
+                    remote:WaitForChild("Slam"):FireServer()
+                    remote:WaitForChild("Sense"):FireServer()
+                    remote:WaitForChild("Enhance"):FireServer()
+                    game:GetService("ReplicatedStorage"):WaitForChild("SkillRemote"):WaitForChild("YutaRemote"):WaitForChild("Domain"):FireServer()
                 end)
             end
         end)
+
         coroutine.resume(autoSkillCoroutine)
     else
-        Fluent:Notify({ Title = "Auto Skill Stopped", Content = "Auto Skill has been stopped.", Duration = 5 })
+        Fluent:Notify({
+            Title = "Auto Skill Stopped",
+            Content = "Auto Skill has been stopped.",
+            Duration = 5
+        })
     end
 end)
 
--- **AUTO BOXES**
+-- AUTO TELEPORT TO BOXES
 local autoBoxToggle = Tabs.Main:AddToggle("AutoBoxToggle", { Title = "Auto Teleport Boxes", Default = false })
 local autoBoxCoroutine
 
 autoBoxToggle:OnChanged(function()
     _G.AutoBox = autoBoxToggle.Value
     if _G.AutoBox then
-        Fluent:Notify({ Title = "Auto Boxes", Content = "Auto teleport to boxes started.", Duration = 5 })
+        -- ปิด coroutine ที่ทำงานอยู่ก่อนหน้า
+        if autoBoxCoroutine then
+            coroutine.close(autoBoxCoroutine)
+        end
+
+        Fluent:Notify({
+            Title = "Auto Boxes",
+            Content = "Auto teleport to boxes started.",
+            Duration = 5
+        })
+
         autoBoxCoroutine = coroutine.create(function()
             local targetNames = {"Box", "Barrel", "Chest"}
             while _G.AutoBox do
-                task.wait()
+                task.wait(0.1)  -- ปรับเวลาหน่วงเป็น 0.1 วินาที
                 pcall(function()
-                    for _, child in pairs(workspace.Item:GetChildren()) do
-                        if table.find(targetNames, child.Name) and child:IsA("BasePart") then
-                            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = child.CFrame
-                            task.wait(2)
+                    -- ตรวจสอบว่า workspace.Item มีอยู่จริง
+                    if workspace:FindFirstChild("Item") then
+                        for _, child in pairs(workspace.Item:GetChildren()) do
+                            if table.find(targetNames, child.Name) and child:IsA("BasePart") then
+                                local character = game.Players.LocalPlayer.Character
+                                if character and character:FindFirstChild("HumanoidRootPart") then
+                                    -- Teleport ไปยังกล่อง
+                                    character.HumanoidRootPart.CFrame = child.CFrame
+                                    local prompt = child:FindFirstChildOfClass("ProximityPrompt")
+                                    -- ตรวจสอบว่า ProximityPrompt มีอยู่และใช้งานได้
+                                    if prompt and prompt.Enabled then
+                                        fireproximityprompt(prompt)  -- กระตุ้น ProximityPrompt
+                                    end
+                                    task.wait(2)  -- เวลาหน่วงระหว่างการทำงาน
+                                end
+                            end
                         end
                     end
                 end)
             end
         end)
+
+        -- เริ่ม coroutine
         coroutine.resume(autoBoxCoroutine)
     else
-        Fluent:Notify({ Title = "Auto Boxes Stopped", Content = "Auto teleport to boxes has been stopped.", Duration = 5 })
+        Fluent:Notify({
+            Title = "Auto Boxes Stopped",
+            Content = "Auto teleport to boxes has been stopped.",
+            Duration = 5
+        })
     end
 end)
 
--- **ANTI KICK**
+
+-- AUTO DULLAHAN FUNCTIONALITY
+local autoDullahanToggle = Tabs.Main:AddToggle("AutoDullahanToggle", { Title = "Auto Dullahan", Default = false })
+local autoDullahanCoroutine
+
+autoDullahanToggle:OnChanged(function()
+    _G.AutoDullahan = autoDullahanToggle.Value
+    if _G.AutoDullahan then
+        Fluent:Notify({
+            Title = "Auto Dullahan",
+            Content = "Started attacking Dullahan.",
+            Duration = 5
+        })
+
+        autoDullahanCoroutine = coroutine.create(function()
+            while _G.AutoDullahan do
+                task.wait()
+                pcall(function()
+                    for _, v in pairs(workspace.Living:GetDescendants()) do
+                        if v.Name == "Dullahan" and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") then
+                            if v.Humanoid.Health > 0 then
+                                _G.AutoBox = false
+                                repeat
+                                    task.wait()
+                                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame =
+                                        v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
+                                until not _G.AutoDullahan or v.Humanoid.Health <= 0
+                                _G.AutoBox = true
+                            end
+                        end
+                    end
+                end)
+            end
+        end)
+
+        coroutine.resume(autoDullahanCoroutine)
+    else
+        Fluent:Notify({
+            Title = "Auto Dullahan",
+            Content = "Stopped attacking Dullahan.",
+            Duration = 5
+        })
+    end
+end)
+
+-- AUTO GET ITEM FUNCTIONALITY
+local AutoGetitemToggle = Tabs.Main:AddToggle("AutoGetitem", { Title = "Auto Get Item", Default = false })
+local AutoGetitemCoroutine
+
+AutoGetitemToggle:OnChanged(function()
+    _G.AutoGetitem = AutoGetitemToggle.Value
+    if _G.AutoGetitem then
+        Fluent:Notify({
+            Title = "Auto Get Item",
+            Content = "Auto get item started.",
+            Duration = 5
+        })
+
+        local itemsFolder = workspace.Item
+
+        -- ฟังก์ชันสำหรับการตั้งค่า ProximityPrompt
+        local function setupProximityPrompt(item)
+            if item:IsA("ProximityPrompt") then
+                item.KeyboardKeyCode = Enum.KeyCode.Unknown
+                item.RequiresLineOfSight = false
+                item.MaxActivationDistance = 10
+                item.HoldDuration = 0
+
+                item.Triggered:Connect(function(player)
+                    print(player.Name .. " ได้ใช้งาน ProximityPrompt ของ " .. item.Parent.Name)
+                end)
+            end
+        end
+
+        -- ตั้งค่า ProximityPrompt สำหรับกล่องที่มีอยู่แล้ว
+        for _, item in pairs(itemsFolder:GetDescendants()) do
+            setupProximityPrompt(item)
+        end
+
+        -- ฟังการสร้างกล่องใหม่ใน workspace.Item
+        itemsFolder.DescendantAdded:Connect(function(item)
+            setupProximityPrompt(item)
+        end)
+
+        -- ใช้ลูปให้ ProximityPrompt ตรวจสอบอย่างต่อเนื่อง
+        while true do
+            for _, item in pairs(itemsFolder:GetDescendants()) do
+                if item:IsA("ProximityPrompt") then
+                    local character = game.Players.LocalPlayer.Character
+                    if character and (item.Parent.Position - character.HumanoidRootPart.Position).Magnitude <= item.MaxActivationDistance then
+                        if not item.Enabled then
+                            item.Enabled = true
+                        end
+                        if not item.Active then
+                            item:Trigger()
+                        end
+                    end
+                end
+            end
+            task.wait(0.1)
+        end
+    else
+        Fluent:Notify({
+            Title = "Auto Get Item Stopped",
+            Content = "Auto get item has been stopped.",
+            Duration = 5
+        })
+    end
+end)
+
+local FixBugBoxToggle = Tabs.Main:AddToggle("FixBugBox", { Title = "Fix Bug Box", Default = false })
+local FixBugBoxCoroutine
+
+FixBugBoxToggle:OnChanged(function()
+    _G.FixBugBox = FixBugBoxToggle.Value
+    if _G.FixBugBox then
+        Fluent:Notify({
+            Title = "Fix Bug Box",
+            Content = "Fix bug box started.",
+            Duration = 5
+        })
+
+        -- ใช้ coroutine ในการจำลองการคลิกขวา
+        FixBugBoxCoroutine = coroutine.create(function()
+            while _G.FixBugBox do
+                -- จำลองการกดปุ่มขวาของเมาส์ (Button2Down)
+                game:GetService("VirtualUser"):Button2Down(Vector2.new(1280, 672))
+                
+                -- รอเวลาเล็กน้อยก่อนปล่อยการคลิกขวา
+                task.wait(0.1)  -- ปรับค่าหน่วงเวลาตามต้องการ
+                
+                -- จำลองการปล่อยการคลิกขวา (Button2Up)
+                game:GetService("VirtualUser"):Button2Up(Vector2.new(1280, 672))
+                
+                -- รอระยะเวลาใหม่ก่อนที่จะทำการคลิกขวาครั้งถัดไป
+                task.wait(1)  -- ปรับระยะเวลาตามต้องการ
+            end
+        end)
+
+        -- เริ่มทำงาน coroutine
+        coroutine.resume(FixBugBoxCoroutine)
+    else
+        Fluent:Notify({
+            Title = "Fix Bug Box Stopped",
+            Content = "Fix bug box has been stopped.",
+            Duration = 5
+        })
+
+        -- หยุด coroutine เมื่อปิด FixBugBox
+        if FixBugBoxCoroutine then
+            -- ใช้ condition เพื่อหยุดการทำงานของ coroutine
+            _G.FixBugBox = false
+        end
+    end
+end)
+
 local antikickToggle = Tabs.Main:AddToggle("antikickToggle", { Title = "Anti Kick", Default = true })
 
 antikickToggle:OnChanged(function()
@@ -149,10 +358,10 @@ antiAFKToggle:OnChanged(function()
     end
 end)
 
--- Save and Config Management
 SaveManager:SetLibrary(Fluent)
 InterfaceManager:SetLibrary(Fluent)
 SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({})
 InterfaceManager:SetFolder("AutoFarmHub")
 SaveManager:SetFolder("AutoFarmHub/specific-game")
 InterfaceManager:BuildInterfaceSection(Tabs.Settings)
@@ -164,5 +373,3 @@ Fluent:Notify({
     Content = "The script has been loaded.",
     Duration = 8
 })
-
-SaveManager:LoadAutoloadConfig()
