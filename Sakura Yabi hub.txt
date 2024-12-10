@@ -179,12 +179,14 @@ autoDullahanToggle:OnChanged(function()
                         if v.Name == "Dullahan" and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") then
                             if v.Humanoid.Health > 0 then
                                 _G.AutoBox = false
+                                _G.autoFame = false
                                 repeat
                                     task.wait()
                                     game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame =
                                         v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
                                 until not _G.AutoDullahan or v.Humanoid.Health <= 0
                                 _G.AutoBox = true
+                                _G.autoFame = true
                             end
                         end
                     end
