@@ -1,127 +1,65 @@
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
-
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
-
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
-
-
 local Window = Fluent:CreateWindow({
-
     Title = "Yabi Hub",
-
     SubTitle = "by GUMIBOA",
-
     TabWidth = 160,
-
     Size = UDim2.fromOffset(580, 460),
-
     Acrylic = true,
-
     Theme = "Dark",
-
     MinimizeKey = Enum.KeyCode.LeftControl
-
 })
 
-
-
 local Tabs = {
-
     Main = Window:AddTab({ Title = "Main", Icon = "" }),
-
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
-
 }
 
-
-
 -- AUTO FAME FUNCTIONALITY
-
 local autoFameToggle = Tabs.Main:AddToggle("AutoFameToggle", { Title = "Auto Fame", Default = false })
-
 local autoFameCoroutine
 
-
-
 autoFameToggle:OnChanged(function()
-
     _G.AutoFame = autoFameToggle.Value
-
     if _G.AutoFame then
-
         Fluent:Notify({
-
             Title = "Auto Fame",
-
             Content = "Auto Fame started.",
-
             Duration = 5
-
         })
-
-
 
         autoFameCoroutine = coroutine.create(function()
-
             local targetMonsters = {"Menos", "Frog Hollow", "Fishbone", "Paper Curse", "Adjuchas", "Paper Curse Quarter"}
 
-
-
             while _G.AutoFame do
-
                 task.wait()
-
                 pcall(function()
-
                     for _, v in pairs(workspace.Living:GetDescendants()) do
-
                         if table.find(targetMonsters, v.Name) and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") then
-
                             if v.Humanoid.Health > 0 then
-
                                 repeat
-
                                     task.wait()
-
                                     game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame =
-
                                         v.HumanoidRootPart.CFrame * CFrame.new(0, 0, -1)
-
                                 until not _G.AutoFame or v.Humanoid.Health <= 0
-
                             end
-
                         end
-
                     end
-
                 end)
-
             end
-
         end)
 
-
-
         coroutine.resume(autoFameCoroutine)
-
     else
-
         Fluent:Notify({
-
             Title = "Auto Fame Stopped",
-
             Content = "Auto Fame has been stopped.",
-
             Duration = 5
-
         })
-
     end
-
 end)
-
 
 
 -- AUTO SKILL FUNCTIONALITY
@@ -133,102 +71,73 @@ local autoSkillCoroutine
 
 
 autoSkillToggle:OnChanged(function()
-
     _G.AutoSkill = autoSkillToggle.Value
-
     if _G.AutoSkill then
-
         Fluent:Notify({
-
             Title = "Auto Skill",
-
             Content = "Auto Skill started.",
-
             Duration = 5
-
         })
-
-
 
         autoSkillCoroutine = coroutine.create(function()
-
             while _G.AutoSkill do
-
                 task.wait()
-
                 pcall(function()
+                    local character = game.Players.LocalPlayer.Character
+                    if not character or not character:FindFirstChild("HumanoidRootPart") then
+                        return
+                    end
 
-                    -- ItadoriRemote
+                    local humanoidRange = 20 -- ระยะห่างสูงสุดที่ถือว่าใกล้
+                    local closeTargetFound = false
 
-                    local itadoriRemote = game:GetService("ReplicatedStorage"):WaitForChild("ItadoriRemote")
+                    -- ตรวจสอบเป้าหมายใกล้เคียง
+                    for _, obj in pairs(workspace.Living:GetDescendants()) do
+                        if obj:FindFirstChild("Humanoid") and obj:FindFirstChild("HumanoidRootPart") and obj ~= character then
+                            local distance = (character.HumanoidRootPart.Position - obj.HumanoidRootPart.Position).Magnitude
+                            if distance <= humanoidRange then
+                                closeTargetFound = true
+                                break
+                            end
+                        end
+                    end
 
-                    itadoriRemote:WaitForChild("Punch"):FireServer()
+                    -- ใช้สกิลหากพบเป้าหมายใกล้เคียง
+                    if closeTargetFound then
+                        local itadoriRemote = game:GetService("ReplicatedStorage"):WaitForChild("ItadoriRemote")
+                        itadoriRemote:WaitForChild("Punch"):FireServer()
+                        itadoriRemote:WaitForChild("Barrage"):FireServer()
+                        itadoriRemote:WaitForChild("Divergent"):FireServer()
+                        itadoriRemote:WaitForChild("BlackFlash"):FireServer()
+                        itadoriRemote:WaitForChild("Slam"):FireServer()
+                        itadoriRemote:WaitForChild("Sense"):FireServer()
+                        itadoriRemote:WaitForChild("Enhance"):FireServer()
 
-                    itadoriRemote:WaitForChild("Barrage"):FireServer()
+                        game:GetService("ReplicatedStorage"):WaitForChild("SkillRemote"):WaitForChild("YutaRemote"):WaitForChild("Domain"):FireServer()
 
-                    itadoriRemote:WaitForChild("Divergent"):FireServer()
-
-                    itadoriRemote:WaitForChild("BlackFlash"):FireServer()
-
-                    itadoriRemote:WaitForChild("Slam"):FireServer()
-
-                    itadoriRemote:WaitForChild("Sense"):FireServer()
-
-                    itadoriRemote:WaitForChild("Enhance"):FireServer()
-
-                    
-
-                    game:GetService("ReplicatedStorage"):WaitForChild("SkillRemote"):WaitForChild("YutaRemote"):WaitForChild("Domain"):FireServer()
-
-
-
-                    -- MidknightRemote
-
-                    local args = {
-
-                        [1] = false
-
-                    }
-
-                    local midknightRemote = game:GetService("ReplicatedStorage"):WaitForChild("MidknightRemote")
-
-                    midknightRemote:WaitForChild("Dawn"):FireServer(unpack(args))
-
-                    midknightRemote:WaitForChild("Beam"):FireServer()
-
-                    midknightRemote:WaitForChild("Ash"):FireServer()
-
-                    midknightRemote:WaitForChild("Cleaving"):FireServer()
-
-                    midknightRemote:WaitForChild("Barrier"):FireServer()
-
-                    midknightRemote:WaitForChild("Punch"):FireServer()
-
+                        local args = { [1] = false }
+                        local midknightRemote = game:GetService("ReplicatedStorage"):WaitForChild("MidknightRemote")
+                        midknightRemote:WaitForChild("Dawn"):FireServer(unpack(args))
+                        midknightRemote:WaitForChild("Beam"):FireServer()
+                        midknightRemote:WaitForChild("Ash"):FireServer()
+                        midknightRemote:WaitForChild("Cleaving"):FireServer()
+                        midknightRemote:WaitForChild("Barrier"):FireServer()
+                        midknightRemote:WaitForChild("Punch"):FireServer()
+                    end
                 end)
-
             end
-
         end)
 
-
-
         coroutine.resume(autoSkillCoroutine)
-
     else
-
         Fluent:Notify({
-
             Title = "Auto Skill Stopped",
-
             Content = "Auto Skill has been stopped.",
-
             Duration = 5
-
         })
-
     end
-
 end)
+
 
 
 
@@ -606,7 +515,7 @@ FixBugBoxToggle:OnChanged(function()
 
                 -- รอเวลาเล็กน้อยก่อนปล่อยการคลิกขวา
 
-                task.wait(0.1)  -- ปรับค่าหน่วงเวลาตามต้องการ
+                task.wait(1)  -- ปรับค่าหน่วงเวลาตามต้องการ
 
                 
 
@@ -698,9 +607,145 @@ antikickToggle:OnChanged(function()
 
 end)
 
+local sellAllToggle = Tabs.Main:AddToggle("SellAllToggle", { Title = "Sell All", Default = false })
+local sellAllCoroutine
+
+sellAllToggle:OnChanged(function()
+    _G.SellAll = sellAllToggle.Value
+
+    if _G.SellAll then
+        Fluent:Notify({
+            Title = "Sell All",
+            Content = "Sell All started.",
+            Duration = 5
+        })
+
+        -- สร้าง coroutine สำหรับการขายไอเท็ม
+        sellAllCoroutine = coroutine.create(function()
+            -- รายการไอเท็มที่ต้องการขาย
+            local itemsToSell = {
+                "Bomu Bomu Devil Fruit",
+                "Haunted Sword",
+                "Bari Bari Devil Fruit",
+                "Mochi Mochi Devil Fruit",
+                "Spin Manual",
+                "Barrel",
+                "Stone Mask",
+                "Stop Sign",
+                "Rokakaka",
+                "Arrow",
+                "Mysterious Camera",
+                "Hamon Manual"
+            }
+
+            -- อ้างอิงไปยัง RemoteEvent
+            local replicatedStorage = game:GetService("ReplicatedStorage")
+            local sellRemote = replicatedStorage:WaitForChild("GlobalUsedRemotes"):WaitForChild("SellItem")
+
+            -- ลูปขายไอเท็มจนกว่า _G.SellAll จะเป็น false
+            while _G.SellAll do
+                for _, itemName in ipairs(itemsToSell) do
+                    sellRemote:FireServer(itemName)
+                    wait(0.1) -- หน่วงเวลาเล็กน้อย
+                end
+            end
+        end)
+
+        -- เริ่ม coroutine
+        coroutine.resume(sellAllCoroutine)
+    else
+        Fluent:Notify({
+            Title = "Sell All Stopped",
+            Content = "Sell All has been stopped.",
+            Duration = 5
+        })
+
+        -- หยุด Sell All
+        _G.SellAll = false
+    end
+end)
 
 
+local upMasteryToggle = Tabs.Main:AddToggle("UPMasteryToggle", { Title = "UPMastery", Default = false })
+local upMasteryCoroutine
 
+upMasteryToggle:OnChanged(function()
+    _G.UPMastery = upMasteryToggle.Value
+
+    if _G.UPMastery then
+        Fluent:Notify({
+            Title = "UPMastery",
+            Content = "UPMastery started.",
+            Duration = 5
+        })
+
+        -- สร้าง coroutine สำหรับอัปเกรด Mastery
+        upMasteryCoroutine = coroutine.create(function()
+            -- อ้างอิง RemoteEvent
+            local replicatedStorage = game:GetService("ReplicatedStorage")
+            local upgradeRemote = replicatedStorage:WaitForChild("GlobalUsedRemotes"):WaitForChild("UpgradeMas")
+
+            -- ลูปอัปเกรด Mastery จนกว่า _G.UPMastery จะเป็น false
+            while _G.UPMastery do
+                upgradeRemote:FireServer()
+                wait(3) -- หน่วงเวลาเล็กน้อยเพื่อป้องกันการส่งคำสั่งเร็วเกินไป
+            end
+        end)
+
+        -- เริ่ม coroutine
+        coroutine.resume(upMasteryCoroutine)
+    else
+        Fluent:Notify({
+            Title = "UPMastery Stopped",
+            Content = "UPMastery has been stopped.",
+            Duration = 5
+        })
+
+        -- หยุด UPMastery
+        _G.UPMastery = false
+    end
+end)
+
+
+local upBreakthroughToggle = Tabs.Main:AddToggle("UPBreakthroughToggle", { Title = "UPBreakthrough", Default = false })
+local upBreakthroughCoroutine
+
+upBreakthroughToggle:OnChanged(function()
+    _G.UPBreakthrough = upBreakthroughToggle.Value
+
+    if _G.UPBreakthrough then
+        Fluent:Notify({
+            Title = "UPBreakthrough",
+            Content = "UPBreakthrough started.",
+            Duration = 5
+        })
+
+        -- สร้าง coroutine สำหรับ Breakthrough
+        upBreakthroughCoroutine = coroutine.create(function()
+            -- อ้างอิง RemoteEvent
+            local replicatedStorage = game:GetService("ReplicatedStorage")
+            local breakthroughRemote = replicatedStorage:WaitForChild("GlobalUsedRemotes"):WaitForChild("Breakthrough")
+
+            -- ลูป Breakthrough จนกว่า _G.UPBreakthrough จะเป็น false
+            while _G.UPBreakthrough do
+                breakthroughRemote:FireServer()
+                wait(3) -- หน่วงเวลาเล็กน้อยเพื่อป้องกันการส่งคำสั่งเร็วเกินไป
+            end
+        end)
+
+        -- เริ่ม coroutine
+        coroutine.resume(upBreakthroughCoroutine)
+    else
+        Fluent:Notify({
+            Title = "UPBreakthrough Stopped",
+            Content = "UPBreakthrough has been stopped.",
+            Duration = 5
+        })
+
+        -- หยุด UPBreakthrough
+        _G.UPBreakthrough = false
+    end
+end)
 
 
 
