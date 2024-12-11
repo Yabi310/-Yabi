@@ -38,7 +38,7 @@ local Tabs = {
 
 -- AUTO FAME FUNCTIONALITY
 
-local autoFameToggle = Tabs.Main:AddToggle("AutoMobToggle", { Title = "Auto Mob", Default = false })
+local autoFameToggle = Tabs.Main:AddToggle("AutoFameToggle", { Title = "Auto Fame", Default = false })
 
 local autoFameCoroutine
 
@@ -158,23 +158,51 @@ autoSkillToggle:OnChanged(function()
 
                 pcall(function()
 
-                    local remote = game:GetService("ReplicatedStorage"):WaitForChild("ItadoriRemote")
+                    -- ItadoriRemote
 
-                    remote:WaitForChild("Punch"):FireServer()
+                    local itadoriRemote = game:GetService("ReplicatedStorage"):WaitForChild("ItadoriRemote")
 
-                    remote:WaitForChild("Barrage"):FireServer()
+                    itadoriRemote:WaitForChild("Punch"):FireServer()
 
-                    remote:WaitForChild("Divergent"):FireServer()
+                    itadoriRemote:WaitForChild("Barrage"):FireServer()
 
-                    remote:WaitForChild("BlackFlash"):FireServer()
+                    itadoriRemote:WaitForChild("Divergent"):FireServer()
 
-                    remote:WaitForChild("Slam"):FireServer()
+                    itadoriRemote:WaitForChild("BlackFlash"):FireServer()
 
-                    remote:WaitForChild("Sense"):FireServer()
+                    itadoriRemote:WaitForChild("Slam"):FireServer()
 
-                    remote:WaitForChild("Enhance"):FireServer()
+                    itadoriRemote:WaitForChild("Sense"):FireServer()
+
+                    itadoriRemote:WaitForChild("Enhance"):FireServer()
+
+                    
 
                     game:GetService("ReplicatedStorage"):WaitForChild("SkillRemote"):WaitForChild("YutaRemote"):WaitForChild("Domain"):FireServer()
+
+
+
+                    -- MidknightRemote
+
+                    local args = {
+
+                        [1] = false
+
+                    }
+
+                    local midknightRemote = game:GetService("ReplicatedStorage"):WaitForChild("MidknightRemote")
+
+                    midknightRemote:WaitForChild("Dawn"):FireServer(unpack(args))
+
+                    midknightRemote:WaitForChild("Beam"):FireServer()
+
+                    midknightRemote:WaitForChild("Ash"):FireServer()
+
+                    midknightRemote:WaitForChild("Cleaving"):FireServer()
+
+                    midknightRemote:WaitForChild("Barrier"):FireServer()
+
+                    midknightRemote:WaitForChild("Punch"):FireServer()
 
                 end)
 
@@ -672,53 +700,7 @@ end)
 
 
 
--- **ANTI AFK**
 
-local antiAFKToggle = Tabs.Main:AddToggle("AntiAFKToggle", { Title = "Anti AFK", Default = false })
-
-local antiAFKCoroutine
-
-
-
-antiAFKToggle:OnChanged(function()
-
-    _G.AntiAFK = antiAFKToggle.Value
-
-    if _G.AntiAFK then
-
-        Fluent:Notify({ Title = "Anti AFK", Content = "Anti AFK started.", Duration = 5 })
-
-        antiAFKCoroutine = coroutine.create(function()
-
-            while _G.AntiAFK do
-
-                task.wait(300)
-
-                pcall(function()
-
-                    local humanoid = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
-
-                    if humanoid then
-
-                        humanoid:Move(Vector3.new(math.random(-1, 1), 0, math.random(-1, 1)))
-
-                    end
-
-                end)
-
-            end
-
-        end)
-
-        coroutine.resume(antiAFKCoroutine)
-
-    else
-
-        Fluent:Notify({ Title = "Anti AFK Stopped", Content = "Anti AFK has been stopped.", Duration = 5 })
-
-    end
-
-end)
 
 
 
