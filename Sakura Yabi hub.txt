@@ -13,9 +13,9 @@ local Window = Fluent:CreateWindow({
 })
 
 local Tabs = {
-    Main = Window:AddTab({ Title = "Main", Icon = "" }),
-    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+    Main = Window:AddTab({ Title = "FARM MONSTER", Icon = "" }),
 }
+
 
 -- AUTO FAME FUNCTIONALITY
 local autoFameToggle = Tabs.Main:AddToggle("AutoFameToggle", { Title = "Auto Fame", Default = false })
@@ -141,6 +141,110 @@ end)
 
 
 
+
+
+
+local Tabs = {
+    Main = Window:AddTab({ Title = "Boss", Icon = "" }),
+}
+
+
+-- AUTO DULLAHAN FUNCTIONALITY
+
+local autoDullahanToggle = Tabs.Main:AddToggle("AutoDullahanToggle", { Title = "Auto Dullahan", Default = false })
+
+local autoDullahanCoroutine
+
+
+
+autoDullahanToggle:OnChanged(function()
+
+    _G.AutoDullahan = autoDullahanToggle.Value
+
+    if _G.AutoDullahan then
+
+        Fluent:Notify({
+
+            Title = "Auto Dullahan",
+
+            Content = "Started attacking Dullahan.",
+
+            Duration = 5
+
+        })
+
+
+
+        autoDullahanCoroutine = coroutine.create(function()
+
+            while _G.AutoDullahan do
+
+                task.wait()
+
+                pcall(function()
+
+                    for _, v in pairs(workspace.Living:GetDescendants()) do
+
+                        if v.Name == "Dullahan" and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") then
+
+                            if v.Humanoid.Health > 0 then
+
+                                _G.AutoBox = false
+
+                                _G.autoFame = false
+
+                                repeat
+
+                                    task.wait()
+
+                                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame =
+
+                                        v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
+
+                                until not _G.AutoDullahan or v.Humanoid.Health <= 0
+
+                                _G.AutoBox = true
+
+                                _G.autoFame = true
+
+                            end
+
+                        end
+
+                    end
+
+                end)
+
+            end
+
+        end)
+
+
+
+        coroutine.resume(autoDullahanCoroutine)
+
+    else
+
+        Fluent:Notify({
+
+            Title = "Auto Dullahan",
+
+            Content = "Stopped attacking Dullahan.",
+
+            Duration = 5
+
+        })
+
+    end
+
+end)
+
+
+
+local Tabs = {
+    Main = Window:AddTab({ Title = "FARM BOX", Icon = "" }),
+}
+
 -- AUTO TELEPORT TO BOXES
 
 local autoBoxToggle = Tabs.Main:AddToggle("AutoBoxToggle", { Title = "Auto Teleport Boxes", Default = false })
@@ -242,100 +346,6 @@ autoBoxToggle:OnChanged(function()
             Title = "Auto Boxes Stopped",
 
             Content = "Auto teleport to boxes has been stopped.",
-
-            Duration = 5
-
-        })
-
-    end
-
-end)
-
-
-
-
-
--- AUTO DULLAHAN FUNCTIONALITY
-
-local autoDullahanToggle = Tabs.Main:AddToggle("AutoDullahanToggle", { Title = "Auto Dullahan", Default = false })
-
-local autoDullahanCoroutine
-
-
-
-autoDullahanToggle:OnChanged(function()
-
-    _G.AutoDullahan = autoDullahanToggle.Value
-
-    if _G.AutoDullahan then
-
-        Fluent:Notify({
-
-            Title = "Auto Dullahan",
-
-            Content = "Started attacking Dullahan.",
-
-            Duration = 5
-
-        })
-
-
-
-        autoDullahanCoroutine = coroutine.create(function()
-
-            while _G.AutoDullahan do
-
-                task.wait()
-
-                pcall(function()
-
-                    for _, v in pairs(workspace.Living:GetDescendants()) do
-
-                        if v.Name == "Dullahan" and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") then
-
-                            if v.Humanoid.Health > 0 then
-
-                                _G.AutoBox = false
-
-                                _G.autoFame = false
-
-                                repeat
-
-                                    task.wait()
-
-                                    game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame =
-
-                                        v.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3)
-
-                                until not _G.AutoDullahan or v.Humanoid.Health <= 0
-
-                                _G.AutoBox = true
-
-                                _G.autoFame = true
-
-                            end
-
-                        end
-
-                    end
-
-                end)
-
-            end
-
-        end)
-
-
-
-        coroutine.resume(autoDullahanCoroutine)
-
-    else
-
-        Fluent:Notify({
-
-            Title = "Auto Dullahan",
-
-            Content = "Stopped attacking Dullahan.",
 
             Duration = 5
 
@@ -567,7 +577,9 @@ FixBugBoxToggle:OnChanged(function()
 
 end)
 
-
+local Tabs = {
+    Main = Window:AddTab({ Title = "Main", Icon = "" }),
+}
 
 local antikickToggle = Tabs.Main:AddToggle("antikickToggle", { Title = "Anti Kick", Default = true })
 
@@ -747,7 +759,126 @@ upBreakthroughToggle:OnChanged(function()
     end
 end)
 
+local autoCollectToggle = Tabs.Main:AddToggle("AutoCollectToggle", { Title = "Auto Collect Monster Items", Default = false })
 
+local autoCollectCoroutine
+
+autoCollectToggle:OnChanged(function()
+    _G.AutoCollect = autoCollectToggle.Value
+
+    if _G.AutoCollect then
+        -- ปิด coroutine ที่ทำงานอยู่ก่อนหน้า
+        if autoCollectCoroutine then
+            coroutine.close(autoCollectCoroutine)
+        end
+
+        Fluent:Notify({
+            Title = "Auto Collect",
+            Content = "Auto collect monster items started.",
+            Duration = 5
+        })
+
+        autoCollectCoroutine = coroutine.create(function()
+            local targetNames = {"Box", "Barrel", "Chest", "PerceptionMask"}  -- เพิ่มกล่องที่ไม่ต้องการให้ไป
+            while _G.AutoCollect do
+                task.wait(0.1)  -- ปรับเวลาหน่วงเป็น 0.1 วินาที
+
+                pcall(function()
+                    -- ตรวจสอบว่า workspace.Item มีอยู่จริง
+                    if workspace:FindFirstChild("Item") then
+                        for _, child in pairs(workspace.Item:GetChildren()) do
+                            -- ตรวจสอบว่า child ไม่ใช่ Box, Chest, PerceptionMask, Barrel
+                            if not table.find(targetNames, child.Name) and child:IsA("BasePart") then
+                                local character = game.Players.LocalPlayer.Character
+                                if character and character:FindFirstChild("HumanoidRootPart") then
+                                    -- Teleport ไปยังกล่อง
+                                    character.HumanoidRootPart.CFrame = child.CFrame
+
+                                    local prompt = child:FindFirstChildOfClass("ProximityPrompt")
+                                    -- ตรวจสอบว่า ProximityPrompt มีอยู่และใช้งานได้
+                                    if prompt and prompt.Enabled then
+                                        fireproximityprompt(prompt)  -- กระตุ้น ProximityPrompt
+                                    end
+
+                                    task.wait(2)  -- เวลาหน่วงระหว่างการทำงาน
+                                end
+                            end
+                        end
+                    end
+                end)
+            end
+        end)
+
+        -- เริ่ม coroutine
+        coroutine.resume(autoCollectCoroutine)
+
+    else
+        Fluent:Notify({
+            Title = "Auto Collect Stopped",
+            Content = "Auto collect monster items has been stopped.",
+            Duration = 5
+        })
+    end
+end)
+
+local Tabs = {
+    Main = Window:AddTab({ Title = "Teleport", Icon = "" }),
+}
+
+local locationNames = {
+    "Park2", "Office", "Rip", "Field", "Park", "Shop", "Cafe", "Office2", "Office3",
+    "Forest", "Forest2", "Library", "RuinedCity", "Depth", "TallestPeak", "LocationOfHeaven",
+    "Cave", "HallOfHeroes", "HolyGrailWar", "GrailRoom", "Ethrixlame", "DarkAlley", "Hueco",
+    "ModOffice", "NothingThere", "Urahara", "BurningHall", "Entrance", "DullahanArena"
+}
+
+-- Teleport function
+local function teleportTo(locationName)
+    local locationsFolder = workspace:FindFirstChild("Locations")
+    if not locationsFolder then
+        Fluent:Notify({ Title = "Error", Content = "Locations folder not found!", Duration = 5 })
+        return
+    end
+
+    local locationPart = locationsFolder:FindFirstChild(locationName)
+    if locationPart and locationPart:IsA("BasePart") then
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+
+        if humanoidRootPart then
+            humanoidRootPart.CFrame = locationPart.CFrame
+            Fluent:Notify({ Title = "Teleported", Content = "Teleported to " .. locationName, Duration = 5 })
+        else
+            Fluent:Notify({ Title = "Error", Content = "HumanoidRootPart not found!", Duration = 5 })
+        end
+    else
+        Fluent:Notify({ Title = "Error", Content = "Location '" .. locationName .. "' not found!", Duration = 5 })
+    end
+end
+
+-- Create buttons for each location
+for _, locationName in ipairs(locationNames) do
+    Tabs.Main:AddButton({
+        Title = locationName,
+        Callback = function()
+            teleportTo(locationName)
+        end
+    })
+end
+
+Window:SelectTab(1)
+
+Fluent:Notify({
+    Title = "Fluent",
+    Content = "Teleport menu loaded.",
+    Duration = 8
+})
+
+
+
+
+Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 
 SaveManager:SetLibrary(Fluent)
 
