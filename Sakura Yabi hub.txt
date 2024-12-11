@@ -349,35 +349,7 @@ antikickToggle:OnChanged(function()
     end
 end)
 
--- **ANTI AFK**
-local antiAFKToggle = Tabs.Main:AddToggle("AntiAFKToggle", { Title = "Anti AFK", Default = false })
-local antiAFKCoroutine
 
-antiAFKToggle:OnChanged(function()
-    _G.AntiAFK = antiAFKToggle.Value
-    if _G.AntiAFK then
-        Fluent:Notify({ Title = "Anti AFK", Content = "Anti AFK started.", Duration = 5 })
-        antiAFKCoroutine = coroutine.create(function()
-            -- ANTI AFK made by Muscle_legends2021 [Gio]
- 
-local VirtualUser = game:GetService('VirtualUser')
- 
-game:GetService('Players').LocalPlayer.Idled:Connect(function()
-    VirtualUser:CaptureController()
-    VirtualUser:ClickButton2(Vector2.new())
-end)
- 
-game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "AntiAFK loaded!",
-    Text = "Made by Gio",
-    Button1 = "Thanks",
-    Duration = 5
-})
-        coroutine.resume(antiAFKCoroutine)
-    else
-        Fluent:Notify({ Title = "Anti AFK Stopped", Content = "Anti AFK has been stopped.", Duration = 5 })
-    end
-end)
 
 SaveManager:SetLibrary(Fluent)
 InterfaceManager:SetLibrary(Fluent)
